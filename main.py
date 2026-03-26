@@ -40,16 +40,19 @@ class TypingApp(ctk.CTk):
         ctk.CTkLabel(diff_frame, text="Difficulty:",
                      font=ctk.CTkFont(size=13, weight="bold"),
                      text_color="gray").pack(side="left", padx=(0, 10))
-
+        
+        self.diff_buttons = {}
         for label, meta in DIFFICULTIES.items():
-            ctk.CTkButton(
+            btn = ctk.CTkButton(
                 diff_frame, text=label, width=110,
                 fg_color="#313244", hover_color="#45475a",
                 text_color=meta["color"],
                 font=ctk.CTkFont(size=13, weight="bold"),
                 corner_radius=8,
-                command=lambda: None  # no functionality yet
-            ).pack(side="left", padx=4)
+                command=lambda l=label: self._select_difficulty(l)
+            )
+            btn.pack(side="left", padx=4)
+            self.diff_buttons[label] = btn  # ← label, not button
 
         #PROMPT CARD
         prompt_frame = ctk.CTkFrame(self, corner_radius=12, fg_color=("#1e1e2e", "#1e1e2e"))
@@ -106,7 +109,17 @@ class TypingApp(ctk.CTk):
                      text_color="#cdd6f4").pack()
         
     def _highlight_diff_btn(self, active):
-        for label, btn in self.diff_buttons:
+        for label, btn in self.diff_buttons():
+            if label == active:
+                btn.configure(fg_color = DIFFICULTIES[label]["color"], text_color = "#1e1e2e")
+            else:
+                btn.configure(fg_color =  "#313244", text_color = DIFFICULTIES[label]["color"])
+
+
+
+    def select_difficulty(self, label):
+        self.difficulty.set(label)
+        self._highlight_diff_btn(label)
         
 
 
