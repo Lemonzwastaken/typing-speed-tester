@@ -18,6 +18,11 @@ class TypingApp(ctk.CTk):
         self.geometry("750x580")
         self.resizable(False, False)
 
+        self.difficulty = ctk.StringVar(value="Easy")
+        self.wpm_var = ctk.StringVar(value="--WPM")
+        self.acc_var = ctk.StringVar(value="--%")
+        self.time_var = ctk.StringVar(value="0.0 s")
+
         self.build_ui()
 
     def build_ui(self):
@@ -54,6 +59,56 @@ class TypingApp(ctk.CTk):
             font=ctk.CTkFont(family="Courier", size=17),
             justify="center", text_color="#cdd6f4"
         ).pack(padx=20, pady=18)
+
+        #STATISTICS
+        stats_frame = ctk.CTkFrame(self, fg_color="transparent")
+        stats_frame.pack(pady=18, padx=40, fill="x")
+        for col in range(3):
+            stats_frame.columnconfigure(col, weight=1)
+ 
+        self._stat_box(stats_frame, "Speed",    self.wpm_var,  0)
+        self._stat_box(stats_frame, "Accuracy", self.acc_var,  1)
+        self._stat_box(stats_frame, "Time",     self.time_var, 2)
+
+        #INPUT TEXTBOX
+        self.entry = ctk.CTkTextbox(
+            self, height=90, corner_radius=10,
+            font=ctk.CTkFont(family="Courier", size=15),
+            border_width=2, border_color="#313244"
+        )
+        self.entry.pack(padx = 40, fill = "x")
+
+        #BUTTONS(To do)
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        btn_frame.pack(pady = 18)
+        ctk.CTkButton(btn_frame, text="New Test (TAB)",width=160,
+                      command=lambda: None ).pack(side = "left", padx = 8)
+        ctk.CTkButton(btn_frame, text="Reset", width=100,
+                      fg_color="#313244", hover_color="#45475a",
+                      command=lambda: None).pack(side="left", padx=8)
+        
+        #RESULTS
+        self.result_banner = ctk.CTkLabel(
+            self, text="", font=ctk.CTkFont(size=15, weight="bold"),
+            text_color="#a6e3a1"
+        )
+
+        self.result_banner.pack(pady = (0,8))
+
+
+    def _stat_box(self, parent, label, var, col):
+        frame = ctk.CTkFrame(parent, corner_radius=10, fg_color=("#1e1e2e", "#1e1e2e"))
+        frame.grid(row=0, column=col, padx=6, sticky="ew", ipady=8)
+        ctk.CTkLabel(frame, text=label,
+                     font=ctk.CTkFont(size=11), text_color="gray").pack()
+        ctk.CTkLabel(frame, textvariable=var,
+                     font=ctk.CTkFont(size=20, weight="bold"),
+                     text_color="#cdd6f4").pack()
+        
+    def _highlight_diff_btn(self, active):
+        for label, btn in self.diff_buttons:
+        
+
 
 
 if __name__ == "__main__":
