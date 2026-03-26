@@ -11,7 +11,6 @@ EASY = [
     "she opened the door and stepped out into the sunlight",
 ]
 
-print("e")
 MEDIUM = [
     "the best way to learn something new is to practice it daily",
     "a good programmer always writes code that others can read easily",
