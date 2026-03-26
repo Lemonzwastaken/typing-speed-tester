@@ -1,5 +1,7 @@
 import customtkinter as ctk
 from sentences import EASY, HARD, MEDIUM, PUNCTUATION
+import random
+import time
 
 DIFFICULTIES = {
     "Easy":        {"sentences": EASY,        "color": "#a6e3a1"},
@@ -61,7 +63,9 @@ class TypingApp(ctk.CTk):
             prompt_frame, text="[ sentence will appear here ]", wraplength=620,
             font=ctk.CTkFont(family="Courier", size=17),
             justify="center", text_color="#cdd6f4"
-        ).pack(padx=20, pady=18)
+        )
+        self.prompt_label.pack(padx=20, pady=18)
+
 
         #STATISTICS
         stats_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -109,20 +113,77 @@ class TypingApp(ctk.CTk):
                      text_color="#cdd6f4").pack()
         
     def _highlight_diff_btn(self, active):
-        for label, btn in self.diff_buttons():
+        for label, btn in self.diff_buttons.items():
             if label == active:
                 btn.configure(fg_color = DIFFICULTIES[label]["color"], text_color = "#1e1e2e")
             else:
                 btn.configure(fg_color =  "#313244", text_color = DIFFICULTIES[label]["color"])
 
 
+    #GAME LOGIC
 
-    def select_difficulty(self, label):
+    def _select_difficulty(self, label):
         self.difficulty.set(label)
         self._highlight_diff_btn(label)
+        self.new_test()
+
+    def new_test(self):
+        pool = DIFFICULTIES[self.difficulty.get()]["sentences"]
+        self.target_text = random.choice(pool)
+        self.prompt_label.configure(text = self.target_text)
+        self.reset()
+
+    def reset(self):
+        self.started = False
+        self.timer_running = False
+        self.start_time = None
+        self.entry.delete("1.0", "end")
+        self.entry.focus()
+        self.wpm_var.set("--WPM")
+        self.acc_var.set("-- %")
+        self.time_var.set("0.0 s")
+        self.result_banner.configure(text = "")
+
+    def _on_key(self, event):
+        typed = self.entry.get("1.0" , "end-1c")
+
+        #STARTS THE TIMER ON KEY PRESSING
+        if not self.started and typed.strip():
+            self.started = True
+            self.timer_running = True
+            self.start_time = time.time()
+            self._tick()
+
+        if not self.started:
+            return
         
+        #ACCURACY CHECK
+        correct = sum(1 for a,b in zip(typed, self.target_text) if a == b)
+        acc = int(correct/ max(len(typed), 1) *100) if typed else 0
+        self.acc_var.set(f"{acc} %")
 
+        if self.target_text.startswith(typed):
+            self.entry.configure(border_color = "#a6e3a1")
+        else:
+            self.entry.configure(border_color = "#f38ba8")
 
+        #CHECK FOR COMPLETING
+        if typed == self.target_text:
+            self.timer_running = False
+            elapsed = time.time() - self.start_time
+            words = len(self.target_text.split())
+            wpm = int(words/(elapsed/60))
+            diff_color = DIFFICULTIES[self.difficulty.get()]['color']
+
+            self.wpm_var.set(f"{wpm} WPM")
+            self.acc_var.set("100 %")
+            self.time_var.set(f"{elapsed:.1f}s")
+            self.result_banner.configure(
+                text = f"FINISHED! {wpm}  - {elapsed:.1f}s  -   Press TAB for next  ",
+                text_color = diff_color
+            )
+
+            self.after(100,self._tick)
 
 if __name__ == "__main__":
     app = TypingApp()
