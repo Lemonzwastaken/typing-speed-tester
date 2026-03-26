@@ -170,6 +170,13 @@ class TypingApp(ctk.CTk):
         else:
             self.entry.configure(border_color="#f38ba8")
 
+        #LIVE WPM
+        if self.start_time:
+            elapsed = time.time() - self.start_time
+            words = len(typed.split())
+            live_wpm = int(words/(elapsed/60)) if elapsed > 0 else 0
+            self.wpm_var.set(f"{live_wpm} WPM")
+
         #CHECK FOR COMPLETING
         if typed == self.target_text:
             self.timer_running = False
